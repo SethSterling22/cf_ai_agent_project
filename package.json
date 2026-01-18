@@ -1,0 +1,25 @@
+{
+  "name": "cf_ai_agent_project",
+  "version": "1.0.0",
+  "description": " Cloudflare AI Agent",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SethSterling22/cf_ai_agent_project.git"
+  },
+  "keywords": [
+    "AI",
+    "Agent",
+    "Workers",
+    "Node"
+  ],
+  "author": "Sebastián H. Sterling",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SethSterling22/cf_ai_agent_project/issues"
+  },
+  "homepage": "https://github.com/SethSterling22/cf_ai_agent_project#readme"
+}
