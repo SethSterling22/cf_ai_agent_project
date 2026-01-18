@@ -57,7 +57,7 @@ export default {
 		// Esto busca información específica del CCOM guardada previamente
 		const embeddingResponse = await env.AI.run('@cf/baai/bge-base-en-v1.5', { text: [message] });
 		const userVector = embeddingResponse.data[0];
-		const matches = await env.VECTOR_INDEX.query(userVector, { topK: 3, returnMetadata: true });
+		const matches = await env.VECTOR_INDEX_NAME.query(userVector, { topK: 3, returnMetadata: true });
 		
 		const contextText = matches.matches.length > 0 
 		? matches.matches.map(m => m.metadata?.text).join('\n')
