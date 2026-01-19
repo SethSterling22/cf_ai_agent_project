@@ -11,9 +11,12 @@
 	"observability": {
 		"enabled": true
 	},
+	"ai": {
+    "binding": "AI"
+	},
 	"d1_databases": [
 		{
-			"binding": "ccom_db",
+			"binding": "DB",
 			"database_name": "ccom_db",
 			"database_id": "c10bd457-aa9b-4316-856c-6b1e8ee5606d"
 		}
@@ -24,11 +27,13 @@
 			"index_name": "ccom_index"
 		}
 	],
-	"AI": [
-		{
-			"binding": "AI"
-		}
-	]
+    "workflows": [
+        {
+            "binding": "EMAIL_WORKFLOW",
+            "name": "ccom-email-automation",
+            "class_name": "EmailAutomationWorkflow"
+        }
+    ]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
