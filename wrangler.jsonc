@@ -3,7 +3,6 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-	
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "cf-ai-agent-project",
 	"main": "src/index.ts",
@@ -12,7 +11,7 @@
 		"enabled": true
 	},
 	"ai": {
-    "binding": "AI"
+		"binding": "AI"
 	},
 	"d1_databases": [
 		{
@@ -24,16 +23,17 @@
 	"vectorize": [
 		{
 			"binding": "VECTORIZE",
-			"index_name": "ccom_index"
+			"index_name": "ccom_index_v2",
+			"remote": true
 		}
 	],
-    "workflows": [
-        {
-            "binding": "EMAIL_WORKFLOW",
-            "name": "ccom-email-automation",
-            "class_name": "EmailAutomationWorkflow"
-        }
-    ]
+	"workflows": [
+		{
+			"binding": "EMAIL_WORKFLOW",
+			"name": "ccom-email-automation",
+			"class_name": "EmailAutomationWorkflow"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
