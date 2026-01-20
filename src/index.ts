@@ -38,7 +38,7 @@
 //     }
 // }
 
-// const SYSTEM_PROMPT_TEMPLATE = (context: string) => `
+// const SYSTEM_PROMPT = (context: string) => `
 // Eres el Asistente de CCOM UPRRP. 
 // CONTEXTO OFICIAL: ${context}
 
@@ -138,7 +138,7 @@
 //             // E. EJECUTAR INFERENCIA CON LLAMA 3.1 (Soporta Tool Calling mejor que 3.3 en Free Tier)
 //         	const aiResponse = await env.AI.run('@cf/meta/llama-3.3-70b-instruct', {
 // 				messages: [
-// 					{ role: 'system', content: SYSTEM_PROMPT_TEMPLATE(contextText) },
+// 					{ role: 'system', content: SYSTEM_PROMPT(contextText) },
 // 					...history.map((h: any) => ({ role: h.role, content: h.content })),
 // 					{ role: 'user', content: message }
 // 				],
@@ -206,6 +206,8 @@
 
 
 import { WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
+import { KNOWLEDGE_BASE } from './context';
+import { SYSTEM_PROMPT } from './prompt';
 
 export interface Env {
     AI: any;
@@ -225,17 +227,6 @@ export class EmailAutomationWorkflow extends WorkflowEntrypoint<Env> {
     }
 }
 
-const SYSTEM_PROMPT_TEMPLATE = (context: string) => `
-Eres el Asistente Oficial de CCOM UPRRP. 
-BASE DE DATOS DE CONTEXTO: 
-${context}
-
-REGLAS DE ORO:
-1. Tu prioridad absoluta es contestar preguntas usando la "BASE DE DATOS DE CONTEXTO".
-2. NO uses la herramienta 'send_email' para responder preguntas informativas. 
-3. SOLO usa 'send_email' si el usuario dice explícitamente palabras como: "envía", "manda", "redacta" o "escríbeles un email".
-4. Si no encuentras la información en el contexto, di que no sabes, pero no inventes.
-`;
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
@@ -243,26 +234,23 @@ export default {
 
         // RUTA DE SEEDING (Para Vectorize)
         if (url.pathname === '/seed') {
-            const ccomInfo = [
-				{ id: "static-1", text: "Los cursos de CCOM son: CCOM 3033 (Programación I), CCOM 3034 (Estructuras de Datos) y CCOM 5050 (Algoritmos)." },
-                { id: "static-2", text: "El director del departamento de Ciencias de Cómputos es José Ortiz Ubarri." },
-                { id: "static-3", text: "Programas disponibles: Bachillerato (ABET), Maestría y Doctorado en Ciencias de Cómputo." },
-                { id: "static-4", text: "Localización: Edificio de Ciencias Naturales Fase II, STE 1701." }
-            ];
-			
-		try {
-				for (const text of ccomInfo) {
+			try {
+				for (const text of KNOWLEDGE_BASE) {
 					// Usamos un modelo de embedding garantizado
 					// const result = await env.AI.run('@cf/baai/bge-small-en-v1.5', { text: [text] });
 					const result = await env.AI.run('@cf/baai/bge-base-en-v1.5', { text: [text] });
 					
 					// Verificamos que 'result.data' exista antes de acceder al índice [0]
 					if (result && result.data && result.data[0]) {
-						await env.VECTORIZE.upsert([{
-							id: crypto.randomUUID(),
-							values: result.data[0],
-							metadata: { text }
-						}]);
+
+					await env.VECTORIZE.upsert([{
+						id: text.id || crypto.randomUUID(),
+						values: result.data[0],
+						metadata: { 
+							// Guardamos el JSON completo como un solo string en la propiedad 'text'
+							text: JSON.stringify(text) 
+						}
+					}]);
 					} else {
 						console.error("Failed to generate embedding for:", text);
 					}
@@ -300,7 +288,7 @@ export default {
         // 4. LLM: Llama 3.3-70b (Especificación recomendada)
         const aiResponse = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
 			messages: [
-                { role: 'system', content: SYSTEM_PROMPT_TEMPLATE(context) },
+                { role: 'system', content: SYSTEM_PROMPT(context) },
                 { role: 'user', content: userMessage }
             ],
 			// tools: [{
